@@ -17,11 +17,12 @@ def hello_world():
 
 @app.route('/cache/upload/')
 def set_cache():
-    with BertClient(port=5555, port_out=5556) as bc:
-        mc = memcache.Client(['127.0.0.1:11211'], debug=True)
-        if not mc.get('vecs'):
-            vecs = bc.encode(questions)
-            mc.set('vecs', vecs)
+    bc = BertClient(port=5555, port_out=5556)
+    mc = memcache.Client(['127.0.0.1:11211'], debug=True)
+    if not mc.get('vecs'):
+        vecs = bc.encode(questions)
+        mc.set('vecs', vecs)
+    bc.close()
 
     return jsonify({'status': 1, 'msg': 'upload success'})
 
@@ -32,14 +33,15 @@ def get_similarity():
     mc = memcache.Client(['127.0.0.1:11211'], debug=False)
     vecs = mc.get('vecs')
 
-    with BertClient(port=5555, port_out=5556) as bc:
-        v = bc.encode([q])
-        sim = cosine_similarity(v[0].reshape(-1, 768), vecs)
-        sim_index = np.argsort(sim)
-        idx = sim_index[0][::-1][0]
+    bc = BertClient(port=5555, port_out=5556)
+    v = bc.encode([q])
+    bc.close()
+    sim = cosine_similarity(v[0].reshape(-1, 768), vecs)
+    sim_index = np.argsort(sim)
+    idx = sim_index[0][::-1][0]
 
-        pro = sim[0][idx]
-        answer = questions[idx]
+    pro = sim[0][idx]
+    answer = questions[idx]
 
     return jsonify({'status': 1, 'msg': {'answer': answer, 'value': float(pro)}})
 
