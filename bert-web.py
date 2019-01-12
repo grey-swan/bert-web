@@ -18,9 +18,10 @@ def hello_world():
 @app.route('/cache/upload/')
 def set_cache():
     with BertClient(port=5555, port_out=5556) as bc:
-        vecs = bc.encode(questions[:2])
         mc = memcache.Client(['127.0.0.1:11211'], debug=True)
-        mc.set('vecs', vecs)
+        if not mc.get('vecs'):
+            vecs = bc.encode(questions)
+            mc.set('vecs', vecs)
 
     return jsonify({'status': 1, 'msg': 'upload success'})
 
