@@ -18,7 +18,7 @@ def hello_world():
 @app.route('/cache/upload/')
 def set_cache():
     with BertClient(port=5555, port_out=5556) as bc:
-        vecs = bc.encode(questions)
+        vecs = bc.encode(questions[:2])
         mc = memcache.Client(['127.0.0.1:11211'], debug=True)
         mc.set('vecs', vecs)
 
@@ -27,9 +27,9 @@ def set_cache():
 
 @app.route('/similarity/', methods=['GET'])
 def get_similarity():
-    q = request.form.get('q', '')
+    q = request.args.get('q', '其他')
     mc = memcache.Client(['127.0.0.1:11211'], debug=False)
-    vecs = mc.get('vecs', [])
+    vecs = mc.get('vecs')
 
     with BertClient(port=5555, port_out=5556) as bc:
         v = bc.encode([q])
@@ -40,7 +40,7 @@ def get_similarity():
         pro = sim[0][idx]
         answer = questions[idx]
 
-    return jsonify({'status': 1, 'msg': {'answer': answer, 'value': pro}})
+    return jsonify({'status': 1, 'msg': {'answer': answer, 'value': float(pro)}})
 
 
 if __name__ == '__main__':
