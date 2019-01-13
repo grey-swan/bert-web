@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>语义识别</title>
+</head>
+<body>
+  <div>
+    <form method="post">
+      <input name="q" placeholder="请输入问题">
+      <input type="submit" value="提交">
+    </form>
+  </div>
+  {% if pro %}
+  <div style="padding-top: 20px;">
+    <p><b>匹配问题：</b>{{ answer }}</p>
+    <p><b>匹配概率：</b>{{ pro }}</p>
+  </div>
+  {% endif %}
+</body>
+</html>
